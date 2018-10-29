@@ -1,8 +1,6 @@
 package org.medvedev.nikita;
 
 import com.alibaba.fastjson.JSON;
-import org.medvedev.nikita.commands.AjaxCommand;
-import org.medvedev.nikita.commands.NotFoundCommand;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,37 +8,32 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 public class MainServlet extends HttpServlet {
+
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter writer = resp.getWriter();
-        //writer.println("Parameters: " + JSON.toJSONString(req.getParameterMap()));
-        //writer.println("Servlet path: "+req.getServletPath());
+        executeFor(req, resp, (str, map) -> CommandManager.getInstance().doGet(str, map));
 
+    }
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //PrintWriter writer = resp.getWriter();
+        //writer.println(JSON.toJSONString(req.getParameterMap()));
+        //writer.close();
+        executeFor(req, resp, (str, map) -> CommandManager.getInstance().doPost(str, map));
+    }
+
+    private void executeFor(HttpServletRequest req, HttpServletResponse resp, BiFunction<String, Map, String> handler) throws IOException
+    {
+        PrintWriter w = resp.getWriter();
         String commandString = req.getServletPath().substring(1);
-        String ajaxResponse = null;
-
-        if (!commandString.isEmpty())
-        {
-            String className = "org.medvedev.nikita.commands."+commandString+"Command";
-            Class commandClass;
-            try {
-                commandClass = Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                commandClass = NotFoundCommand.class;
-
-            }
-            try {
-                AjaxCommand ajaxCommand = (AjaxCommand)commandClass.newInstance();
-                ajaxResponse = JSON.toJSONString(ajaxCommand.doCommand(req.getParameterMap()));
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-
-        }
-        writer.println(ajaxResponse);
-        writer.close();
-
+        String ajaxResponse = handler.apply(commandString, req.getParameterMap());
+        resp.setContentType("application/json");
+        w.println(ajaxResponse);
+        w.close();
     }
 }
