@@ -1,8 +1,13 @@
 package org.medvedev.nikita.commands;
 
-public class HandleError extends Exception {
-    public HandleError(String msg)
+class HandleError extends Exception {
+    private final int code;
+    HandleError(int code)
     {
-        super(msg);
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
     }
 }

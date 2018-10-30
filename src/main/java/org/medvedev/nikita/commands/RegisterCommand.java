@@ -2,6 +2,7 @@ package org.medvedev.nikita.commands;
 
 import org.medvedev.nikita.database.MysqlConnector;
 import org.medvedev.nikita.objects.Token;
+import org.medvedev.nikita.services.Errors;
 import org.medvedev.nikita.services.FluidBuilderStringMap;
 import org.medvedev.nikita.services.Utils;
 
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 public class RegisterCommand extends AjaxCommand {
     private static MysqlConnector connector = MysqlConnector.getInstance();
     public RegisterCommand() {
-        super(new String[]{"login", "first_name", "second_name", "email", "password"});
+        super(new String[]{"login", "first_name", "second_name", "email", "password"}, false);
     }
 
     @Override
@@ -36,16 +37,16 @@ public class RegisterCommand extends AjaxCommand {
     private void checkLogin(String login) throws HandleError, SQLException
     {
         if (login.length()> 15)
-            throw new HandleError("Login is too long!");
+            throw new HandleError(Errors.LONG_LOGIN);
         if (login.length() < 6)
-            throw new HandleError("Login is too short!");
+            throw new HandleError(Errors.SHORT_LOGIN);
 
         final String regex = "^[A-z_-]*$";
         final Pattern pattern = Pattern.compile(regex);
         final Matcher matcher = pattern.matcher(login);
 
         if (!matcher.find()) {
-            throw new HandleError("Wrong login!");
+            throw new HandleError(Errors.WRONG_LOGIN_SYMBOLS);
         }
 
         boolean exists = connector.select("SELECT login FROM users WHERE login = ?;", rs->{
@@ -59,7 +60,7 @@ public class RegisterCommand extends AjaxCommand {
             return ok;
         }, login);
         if (exists)
-            throw new HandleError("Login exists!");
+            throw new HandleError(Errors.LOGIN_EXISTS);
     }
     private void checkEmail(String email) throws HandleError, SQLException {
         final String regex = "^[-\\w.]+@([A-z0-9][-A-z0-9]+\\.)+[A-z]{2,4}$";
@@ -67,7 +68,7 @@ public class RegisterCommand extends AjaxCommand {
         final Matcher matcher = pattern.matcher(email);
 
         if (!matcher.find()) {
-            throw new HandleError("Wrong email!");
+            throw new HandleError(Errors.WRONG_MAIL);
         }
 
         boolean exists = connector.select("SELECT login FROM users WHERE email = ?;", rs->{
@@ -81,13 +82,13 @@ public class RegisterCommand extends AjaxCommand {
             return ok;
         }, email);
         if (exists)
-            throw new HandleError("Email exists!");
+            throw new HandleError(Errors.MAIL_EXISTS);
 
     }
     private void checkPassword(String password) throws HandleError
     {
         if (password.length() < 6)
-            throw new HandleError("Password is too short!");
+            throw new HandleError(Errors.SHORT_PASSWORD);
     }
 
 }

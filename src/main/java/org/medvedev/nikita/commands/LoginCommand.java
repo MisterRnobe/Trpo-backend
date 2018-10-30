@@ -2,6 +2,7 @@ package org.medvedev.nikita.commands;
 
 import org.medvedev.nikita.database.MysqlConnector;
 import org.medvedev.nikita.objects.Token;
+import org.medvedev.nikita.services.Errors;
 import org.medvedev.nikita.services.FluidBuilderStringMap;
 import org.medvedev.nikita.services.Utils;
 
@@ -11,7 +12,7 @@ import java.util.Map;
 public class LoginCommand extends AjaxCommand {
     private MysqlConnector connector;
     public LoginCommand() {
-        super(new String[]{"login", "password"});
+        super(new String[]{"login", "password"}, false);
         connector = MysqlConnector.getInstance();
     }
 
@@ -37,7 +38,7 @@ public class LoginCommand extends AjaxCommand {
             return correct;
         }, login, password);
         if (!isOk)
-            throw new HandleError("Wrong login or password!");
+            throw new HandleError(Errors.BAD_DATA);
 
     }
     private String getToken(String login) throws SQLException

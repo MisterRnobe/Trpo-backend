@@ -1,6 +1,7 @@
 package org.medvedev.nikita;
 
 import com.alibaba.fastjson.JSON;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -13,8 +14,10 @@ import java.util.function.BiFunction;
 
 public class MainServlet extends HttpServlet {
 
+    private static final Logger logger = Logger.getLogger(MainServlet.class);
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        logger.info("[GET]Connected: "+req.getRemoteAddr()+" function: "+req.getServletPath()+" params: "+ JSON.toJSONString(req.getParameterMap()));
         executeFor(req, resp, (str, map) -> CommandManager.getInstance().doGet(str, map));
 
     }
@@ -24,6 +27,7 @@ public class MainServlet extends HttpServlet {
         //PrintWriter writer = resp.getWriter();
         //writer.println(JSON.toJSONString(req.getParameterMap()));
         //writer.close();
+        logger.info("[POST] Connected: "+req.getRemoteAddr()+" function: "+req.getServletPath()+" params: "+ JSON.toJSONString(req.getParameterMap()));
         executeFor(req, resp, (str, map) -> CommandManager.getInstance().doPost(str, map));
     }
 

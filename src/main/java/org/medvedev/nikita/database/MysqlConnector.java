@@ -1,5 +1,7 @@
 package org.medvedev.nikita.database;
 
+import org.apache.log4j.Logger;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class MysqlConnector {
     private static MysqlConnector instance;
+    private static final Logger logger = Logger.getLogger(MysqlConnector.class);
 
     public static MysqlConnector getInstance() {
         if (instance == null)
@@ -21,8 +24,8 @@ public class MysqlConnector {
     private MysqlConnector()
     {
         String url = "jdbc:mysql://localhost:3306/trpo";
-        String login = "root";
-        String pass = "nikita";
+        String login = "nikita";
+        String pass = "pass";
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -39,7 +42,7 @@ public class MysqlConnector {
                     .map(e -> e.getKey() + " = '" + e.getValue()+"'")
                     .collect(Collectors.joining(", "));
             String query = "UPDATE " + table + " SET " + newValues + " WHERE " + field + " = '" + id + "';";
-            System.out.println(query);
+            logger.info("Executing update: "+query);
             statement.executeUpdate(query);
         }
     }
@@ -61,7 +64,7 @@ public class MysqlConnector {
         }
         builder.setCharAt(builder.length()-1, ')');
         builder.append(";");
-        System.out.println(builder.toString());
+        logger.info("Executing insert: "+builder.toString());
         PreparedStatement preparedStatement = connection.prepareStatement(builder.toString(), Statement.RETURN_GENERATED_KEYS);
         int lastKey = -1;
         for(int i = 0; i < keys.size(); i++)
@@ -79,9 +82,9 @@ public class MysqlConnector {
     }
 
 
-    public synchronized  <E> E select(String query, Function<ResultSet, E> consumer, String... values) throws SQLException {
+    public  <E> E select(String query, Function<ResultSet, E> consumer, String... values) throws SQLException {
         E result;
-        System.out.println(query);
+        logger.info("Executing select: " + query);
         try(PreparedStatement statement = connection.prepareStatement(query))
         {
             for (int i = 0; i < values.length; i++) {
