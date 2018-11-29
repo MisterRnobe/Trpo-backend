@@ -17,7 +17,7 @@ public class MainServlet extends HttpServlet {
     private static final Logger logger = Logger.getLogger(MainServlet.class);
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        logger.info("[GET]Connected: "+req.getRemoteAddr()+" function: "+req.getServletPath()+" params: "+ JSON.toJSONString(req.getParameterMap()));
+        logger.info("[GET] Connected: "+req.getRemoteAddr()+" function: "+req.getServletPath()+" params: "+ JSON.toJSONString(req.getParameterMap()));
         executeFor(req, resp, (str, map) -> CommandManager.getInstance().doGet(str, map));
 
     }
@@ -33,10 +33,11 @@ public class MainServlet extends HttpServlet {
 
     private void executeFor(HttpServletRequest req, HttpServletResponse resp, BiFunction<String, Map, String> handler) throws IOException
     {
+        resp.setContentType("application/json; charset=utf-8");
         PrintWriter w = resp.getWriter();
         String commandString = req.getServletPath().substring(1);
         String ajaxResponse = handler.apply(commandString, req.getParameterMap());
-        resp.setContentType("application/json");
+        logger.info("DONE. Result: "+ajaxResponse);
         w.println(ajaxResponse);
         w.close();
     }

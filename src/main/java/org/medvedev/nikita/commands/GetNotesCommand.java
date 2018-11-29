@@ -1,7 +1,7 @@
 package org.medvedev.nikita.commands;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
-import org.medvedev.nikita.database.MysqlConnector;
 import org.medvedev.nikita.objects.Note;
 import org.medvedev.nikita.services.Errors;
 
@@ -25,7 +25,7 @@ public class GetNotesCommand extends AjaxCommand {
         {
             throw new HandleError(Errors.WRONG_REQUEST_PARAMETERS);
         }
-        return list;
+        return new JSONObject().fluentPut("notes", list);
     }
     private List<Note> getNotes(String login, int count, int offset) throws SQLException {
         return connector.select("SELECT id,title, note, time_created FROM notes WHERE login = ? ORDER BY time_created LIMIT "+offset+", "+count+";",

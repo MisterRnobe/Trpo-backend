@@ -2,8 +2,9 @@ package org.medvedev.nikita.commands;
 
 import org.medvedev.nikita.database.MysqlConnector;
 import org.medvedev.nikita.objects.Token;
+import org.medvedev.nikita.objects.UserData;
 import org.medvedev.nikita.services.Errors;
-import org.medvedev.nikita.services.FluidBuilderStringMap;
+import org.medvedev.nikita.services.FluentBuilderStringMap;
 import org.medvedev.nikita.services.Utils;
 
 import java.sql.SQLException;
@@ -26,12 +27,17 @@ public class RegisterCommand extends AjaxCommand {
         checkEmail(email);
         checkPassword(password);
         parameters.computeIfPresent("password", (key, val) -> Utils.sha256(val));
-
         connector.insert("users", parameters);
 
-        String token = Utils.generateToken(login);
-        connector.insert("tokens", new FluidBuilderStringMap().fluidPut("login", login).fluidPut("token", token)
-                .fluidPut("expires", System.currentTimeMillis() + Utils.WEEK));
+        UserData userData = new UserData()
+                .setLogin(login)
+                .setEmail(email)
+                .setFirstName(parameters.get("first_name"))
+                .setSecondName(parameters.get("second_name"));
+
+        String token = Utils.generateToken(userData);
+        //connector.insert("tokens", new FluentBuilderStringMap().fluentPut("login", login).fluentPut("token", token)
+        //        .fluentPut("expires", System.currentTimeMillis() + Utils.WEEK));
         return new Token().setToken(token);
     }
     private void checkLogin(String login) throws HandleError, SQLException

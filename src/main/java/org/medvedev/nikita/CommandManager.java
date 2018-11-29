@@ -1,7 +1,6 @@
 package org.medvedev.nikita;
 
 
-import com.alibaba.fastjson.JSON;
 import org.apache.log4j.Logger;
 import org.medvedev.nikita.commands.*;
 
@@ -14,6 +13,9 @@ public class CommandManager {
     public static final String LOGIN = "login";
     public static final String ADD_NOTE = "add_note";
     public static final String GET_NOTES = "get_notes";
+    public static final String UPDATE_TOKEN = "update_token";
+    public static final String REMOVE_NOTE = "remove_note";
+    public static final String EDIT_NOTE = "edit_note";
     private final AjaxCommand notFound = new NotFoundCommand();
     private final Logger logger = Logger.getLogger(CommandManager.class);
 
@@ -37,7 +39,6 @@ public class CommandManager {
     public String doGet(String method, Map parameters)
     {
         AjaxCommand command;
-        //logger.info("Method: "+method+". GetHandlers: "+JSON.toJSONString(getHandlers));
         if ((command = getHandlers.get(method)) == null)
             command = notFound;
 
@@ -60,5 +61,8 @@ public class CommandManager {
         postHandlers.put(REGISTER, new RegisterCommand());
         postHandlers.put(LOGIN, new LoginCommand());
         postHandlers.put(ADD_NOTE, new AddNoteCommand());
+        postHandlers.put(UPDATE_TOKEN, new UpdateTokenCommand());
+        postHandlers.put(REMOVE_NOTE, new RemoveNoteCommand());
+        postHandlers.put(EDIT_NOTE, new EditNoteCommand());
     }
 }
